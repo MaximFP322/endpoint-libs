@@ -100,21 +100,21 @@ impl<
         context.seq = req.seq;
         context.method = req.method;
         context.user_id = self.conn_info.get_user_id();
-        context.roles = Arc::new(self.conn_info.get_roles());
+        // context.roles = Arc::new(self.conn_info.get_roles());
 
         // Check roles
         let Some(allowed_roles) = self.server.allowed_roles.get(&req.method) else {
             return Ok(true);
         };
 
-        let allowed = check_roles(&context.roles, allowed_roles);
-        if !allowed {
-            self.server.toolbox.send(
-                context.connection_id,
-                request_error_to_resp(&context, ErrorCode::FORBIDDEN, "Forbidden"),
-            );
-            return Ok(true);
-        }
+        // let allowed = check_roles(&context.roles, allowed_roles);
+        // if !allowed {
+        //     self.server.toolbox.send(
+        //         context.connection_id,
+        //         request_error_to_resp(&context, ErrorCode::FORBIDDEN, "Forbidden"),
+        //     );
+        //     return Ok(true);
+        // }
 
         let handler = self.server.handlers.get(&req.method);
         let handler = match handler {
