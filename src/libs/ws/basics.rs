@@ -98,14 +98,17 @@ pub fn internal_error_to_resp(
     err0: eyre::Error,
 ) -> WsResponseValue {
     let log_id = ctx.log_id.to_string();
+    let err_text = format!("{:?}", err0);
     let err = WsResponseError {
         method: ctx.method,
         code: code.to_u32(),
         seq: ctx.seq,
         log_id,
-        params: Value::Null,
+        params: Value::String(err_text),
     };
+    println!("Internal error: {:?}, {:?}", err0, err);
     tracing::error!("Internal error: {:?} {:?}", err, err0);
+    tracing::info!("Internal error: {:?} {:?}", err, err0);
     WsResponseValue::Error(err)
 }
 
