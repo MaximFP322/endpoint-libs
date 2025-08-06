@@ -103,6 +103,7 @@ pub enum WsResponseGeneric<Resp> {
 
 pub type WsResponseValue = WsResponseGeneric<Value>;
 
+#[derive(Debug)]
 pub struct WsEndpoint {
     pub schema: EndpointSchema,
     pub handler: Arc<dyn RequestHandlerErased>,

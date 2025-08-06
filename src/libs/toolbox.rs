@@ -99,6 +99,7 @@ impl RequestContext {
     }
 }
 
+#[derive(Debug)]
 pub struct Toolbox {
     pub send_msg: RwLock<Arc<dyn Fn(ConnectionId, WsResponseValue) -> bool + Send + Sync>>,
 }

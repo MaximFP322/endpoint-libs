@@ -59,13 +59,14 @@ impl<
     }
     // if continue, returns true
     fn handle_message(&mut self, msg: Message) -> Result<bool> {
+        info!("Handling message: {:?}", msg);
         let addr = &self.conn_info.address;
         let mut context = RequestContext::from_conn(&self.conn_info);
 
         let obj: Result<WsRequestValue, _> = match msg {
             Message::Text(t) => {
                 debug!(?addr, "Handling request {}", t);
-
+                info!(?addr, ?t, "Received message");
                 serde_json::from_str(&t)
             }
             Message::Binary(b) => {
@@ -97,15 +98,16 @@ impl<
                 return Ok(true);
             }
         };
+        info!(?addr, ?req, "request");
         context.seq = req.seq;
         context.method = req.method;
         context.user_id = self.conn_info.get_user_id();
         // context.roles = Arc::new(self.conn_info.get_roles());
 
         // Check roles
-        let Some(allowed_roles) = self.server.allowed_roles.get(&req.method) else {
-            return Ok(true);
-        };
+        // let Some(allowed_roles) = self.server.allowed_roles.get(&req.method) else {
+        //     return Ok(true);
+        // };
 
         // let allowed = check_roles(&context.roles, allowed_roles);
         // if !allowed {
@@ -117,6 +119,8 @@ impl<
         // }
 
         let handler = self.server.handlers.get(&req.method);
+        info!(?handler, "handler curr");
+        info!(?self.server, "server");
         let handler = match handler {
             Some(handler) => handler,
             None => {
