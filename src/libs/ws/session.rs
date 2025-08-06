@@ -61,7 +61,14 @@ impl<
         let addr = &self.conn_info.address;
         let mut context = RequestContext::from_conn(&self.conn_info);
 
-        let obj: Result<WsRequestValue, _> = match msg {
+        match &msg {
+            Message::Text(t)   => println!("<<< TEXT from {addr}: {t}"),
+            Message::Binary(b) => println!("<<< BIN  from {addr}: {b:#x?}"),
+            _                  => {}
+        }
+
+
+            let obj: Result<WsRequestValue, _> = match msg {
             Message::Text(t) => {
                 debug!(?addr, "Handling request {}", t);
 
@@ -87,7 +94,10 @@ impl<
             }
         };
         let req = match obj {
-            Ok(req) => req,
+            Ok(req) => {
+                info!(method = req.method, seq = req.seq, "parsed request");
+                req
+            },
             Err(err) => {
                 self.server.toolbox.send(
                     context.connection_id,
@@ -108,12 +118,19 @@ impl<
         let handler = match handler {
             Some(handler) => handler,
             None => {
+                println!(
+                    "!!! Unknown method {}.\n    Implemented: {:?}",
+                    req.method,
+                    self.server.handlers.keys().collect::<Vec<_>>()      // → [1, 2, 42, …]
+                );
+
+
                 self.server.toolbox.send(
                     context.connection_id,
                     request_error_to_resp(
                         &context,
                         ErrorCode::new(100501), // Not Implemented
-                        Value::Null,
+                        format!("Unknown method {}", req.method),
                     ),
                 );
                 return Ok(true);
